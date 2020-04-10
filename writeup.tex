@@ -1,0 +1,190 @@
+\documentclass{paper}
+\usepackage{amsmath,amssymb,calligra,bm,graphicx,hyperref,braket,subfiles}
+\usepackage[toc,page]{appendix}
+\usepackage{changepage}
+%% Font and Page Setup
+\usepackage[margin=1.5 in]{geometry}
+%\renewcommand{\familydefault}{\ttdefault}
+%\usepackage[euler-digits,euler-hat-accent]{eulervm}
+%% Shortcuts
+% Special Fonts
+\newcommand{\bb}[1]{\mathbb{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+% Differential Operators
+\newcommand{\der}[1]{\partial_{#1}}
+\newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\dder}[2]{\frac{d #1}{d #2}}
+\newcommand{\grad}{\mathrm{grad}}
+\newcommand{\sgrad}{\mathrm{sgrad}}
+\newcommand{\curl}{\mathrm{curl}}
+\newcommand{\dive}{\mathrm{div}}
+\newcommand{\lapl}{\bigtriangleup}
+\newcommand{\dal}{\Box}
+\newcommand{\lder}{\mc{L}}
+\newcommand{\cder}{\nabla}
+% Matrices and Vectors
+\newcommand{\matx}[1]{\left[\begin{matrix} #1 \end{matrix}\right]}
+\newcommand{\detm}[1]{\left|\begin{matrix} #1 \end{matrix}\right|}
+\newcommand{\syst}[1]{\left\{\begin{matrix}#1 \end{matrix}\right.}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\matr}[1]{\mathbf{#1}}
+\newcommand{\hatt}[1]{\bm{\hat{#1}}}
+\newcommand{\tanv}{\hatt{t}}
+\newcommand{\norv}{\hatt{n}}
+\newcommand{\bv}[1]{\vect{e}_{#1}}
+% Functions That Are Used
+\newcommand{\norm}[1]{\left|\left| #1 \right|\right|}
+\newcommand{\matel}[3]{\left<#1\right|#2\left|#3\right>}
+\newcommand{\proj}[2]{\text{proj}_{#1} {#2}}
+\newcommand{\inp}[2]{\left<#1\left| #2\right>\right.}
+\newcommand{\comm}[2]{\left[#1,#2\right]}
+\newcommand{\pois}[2]{\left\{#1,#2\right\}}
+\newcommand{\acomm}[2]{\left\{#1,#2\right\}}
+\newcommand{\avg}[1]{\left< #1 \right>}
+\newcommand{\Arg}{\text{Arg}}
+\newcommand{\atan}{\text{atan2}}
+\newcommand{\eset}{\varnothing}
+
+%% Stuff for inserting code into document
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\author{Noah J. Blair}
+\title{Python Tools for Visualization of  Periodically Driven Dynamical Systems}
+\begin{document}
+\maketitle
+\begin{abstract}
+Periodic driving forces are very common in dynamical systems theory. One of the most common types is a force that is independent of the dynamical variables, and is sinusoidal in time. A Python program was written to generate a plot of the Poincare section of this type of force for a variety of sysems. These tools are used to analyze the damped driven pendulum and forced Duffing equation for various values of the driving force strength.
+\end{abstract}
+\section{Introduction}
+For time independent dynamical systems, the solutions are often visualized as phase flow on the phase space. For one degree of freedom, these systems are characterized by their generalized coordinate $q$, and the conjugate momentum $p$. If $X_q$ is the domain of $q$ and $X_p$ is the domain of $p$, then our phase space is $\bb{P}=X_q\times X_p$. Usually the domain of our dynamical variables is $\bb{R}$, so our phase space is $\bb{P}=\bb{R}^2$.\\
+The visualization of solutions as curves in phase space is very useful for time-independent solutions, but if there is a time-dependent force, then the solution can be very difficult to interpret. This is because the phase curves may now intersect each other, and are no longer Jordan curves. For a subset of these problems, where the time dependent force is periodic in time, we may introduce the Poincare map to visualize these solutions. We will let the position in phase space be represented by $\eta(t)=(q(t),p(t))$ to write the differential equation as $\dot{\eta}=v(\eta,t)$. We will assume that the time-dependent part of the force has a period of $1$ (this can be done by rescaling our units of time) to say that $v(\eta,t)=v(\eta,t+1)$. We then define a function $\mc{P}:\eta(t)\mapsto\eta(t+1)$ to solve the system over one period. We denote the point $\eta_n=\mc{P}^n(\eta(0))$. Here the superscript $n$ denotes function composition, not powers. This generates a set of points in $\bb{P}$ to simplify the view of the dynamics of the system. This method then allows us to study the geometric aspects of time-dependent systems in a similar manner to time-independent systems. This also moves the problem from one in differential equations, to one in discrete dynamical systems which has some easier methods for solving, than a time-dependent system.
+\section{Sinusoidal Forces}
+A common type of system is one that is derivable from a Hamiltonian system, with a sinusoidal force added on. In this case the equations of motion become:
+\begin{equation}
+    \syst{
+        \dot{q}=p\\
+        \dot{p}=f(q,p)+ \gamma \cos(2\pi t)
+    }
+\end{equation}
+where $f(q,p)$ is the time-independent force, and $\gamma$ is a measure of the strength of the driving force. To implement this system in python, we first need a function to return the time independent force. I have created code to implement these forces for the linear damped oscillator, the nonlinear damped pendulum, and the undamped Duffing equation.\\
+\begin{lstlisting}
+## Common unforced systems (called by one_period_sol)
+# for all of these
+    # q:= current position; float
+    # p:= current momentum; float
+# Linear oscillator
+def linear_osc(q,p):
+    # damping coefficient and natural frequency respectively
+    b = 0.5
+    w = 6.0
+    # gives force
+    force = -2.0*b*p - (w**2)*q
+    return force
+# Damped Driven Pendulum
+def ddpend(q,p):
+    # damping coefficient and natural frequency respectively
+    b = 0.5
+    w = 6.0
+    # gives force
+    force = -2.0*b*p - (w**2)*np.sin(q)
+    return force
+# Duffing Equation
+def duffing(q,p):
+    force = q - (q**3)
+    return force
+\end{lstlisting}
+These take the input of the current position and momentum, and return the force $f(q,p)$ that the object would feel. These are then called by the following program as the time independent force. This uses a Runga-Kutta algorithm to solve the equation for the first period. In effect, this is the Poincare map applied once to a single point. The paramgeter $g$ that shows up here is a measure of the strength of the driving force. This parameter will come up in later sections.
+
+\begin{lstlisting}
+# Function to use runga kutta solve system over one period
+# dq/dt = p
+# dp/dt = f(q,p) + g*cos(2 pi t)
+    # time_ind_force:= the time independent force (q,p); function
+    # q:= position; float
+    # p:= generalized momentum; float
+    # g:= driving strength
+def one_period_sol(time_ind_force,qo,po,g):
+    # time step for runga-kutta
+    dt = 1.0/50.0
+    # starts q and p at their initial values
+    q = qo
+    p = po
+    for j in range(0,50):
+        # current value of time
+        t = dt*j
+        # the runga-kutta 45 correction terms
+        k1q = dt*p
+        k1p = dt*(time_ind_force(q,p) + g*np.cos(2*np.pi*t))
+        k2q = dt*(p + (0.5*k1p))
+        k2p = dt*(time_ind_force(q + (0.5*k1p),p + (0.5*k1p)) + g*np.cos(2*np.pi*(t+0.5*dt)))
+        k3q = dt*(p + (0.5*k2p))
+        k3p = dt*(time_ind_force(q + (0.5*k2p),p + (0.5*k2p)) + g*np.cos(2*np.pi*(t+0.5*dt)))
+        k4q = dt*(p + k3p)
+        k4p = dt*(time_ind_force(q + k3p,p + k3p) + g*np.cos(2*np.pi*(t+dt)))
+        q += (1.0/6.0) *(k1q + 2*k2q + 2*k3q + k4q)
+        p += (1.0/6.0) *(k1p + 2*k2p + 2*k3p + k4p)
+    return q,p
+\end{lstlisting}
+The following two functions use the above function to iterate the Poincare map, and generate the first $n$ values of the section given the initial conditions. The second function will then plot section in the phase plane in order to visualize the dynamics of the system.
+\begin{lstlisting}
+# Generates the first n values of the poincare map
+    # time_ind_force:= the time independent force (q,p); function
+    # qo:= the initial position; float
+    # po:= the initial momentum; float
+    # g:= the strength of driving force; float
+    # n:= number of periods; int
+def poincare(time_ind_force,qo,po,g,n):
+    # initializes the arrays
+    qvals = np.zeros(n)
+    pvals = np.zeros(n)
+    qvals[0] = qo
+    pvals[0] = po
+    # computes the evolution of each point and then adds that point to the array
+    for k in range(1,n):
+        q,p = one_period_sol(time_ind_force,qvals[k-1],pvals[k-1],g)
+        qvals[k] = q
+        pvals[k] = p
+    return qvals, pvals
+
+# Plots poincare map for damped driven pendulum over n periods
+    # time_ind_force:= the time independent force (q,p); function
+    # qo:= the initial position; float
+    # po:= the initial momentum; float
+    # g:= the strength of driving force; float
+    # n:= number of periods; int
+def poincare_plot(time_ind_force,qo,po,g,n):
+    qvals, pvals = poincare(time_ind_force,qo,po,g,n)
+    plt.scatter(qvals,pvals)
+    plt.show()
+\end{lstlisting}
+\section{Damped Driven Pendulum}
+The damped driven pendulum is a classical example of a 
+\section{Forced Duffing Equation}
+\section{Conclusion}
+\newpage
+\section{References}
+Blanchard, P., Devaney, R. L., \& Hall, G. R. (2012). \textit{Differential equations}. Boston, MA: Brooks/Cole, Cengage Learning.\\
+Percival, I., \& Richards, D. (1999). \textit{Introduction to dynamics}. Cambridge: Cambridge University Press. \\
+Taylor, J. R. (2005). \textit{Classical mechanics}. University Science Books.
+\end{document}
