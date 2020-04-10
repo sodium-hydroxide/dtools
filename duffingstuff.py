@@ -5,21 +5,16 @@ import sympy as sp
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-import dynamicstools as dt
+import dtools as dt
 
-#dt.duffing_poincare_plot(0.5,0.3,1.0,500)
+# Produces poincare section for the duffing equation when the initial conditions are (0.5,0.5)
+# the parameter g gives the strength of the driving force 
+def duffing_run(g):
+    q, p = dt.poincare(dt.duffing,0.5,0.0,g,100)
+    return q, p
 
+q, p  = duffing_run(0.0)
 
-y = np.zeros(20)
-x = np.zeros(20)
+plt.scatter(q,p)
 
-for j in range(20):
-    x[j] = j + 1
-   # y[j] = 4*j + 1 + 4
-    A = 1
-    for k in range(j):
-        A = A*(4*k + 1)
-    y[j] = A
-
-print(x)
-print(y)
+plt.show()

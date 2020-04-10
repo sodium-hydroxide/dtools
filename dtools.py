@@ -128,4 +128,3 @@ def periodic_impulse_plot(impulse,qo,po,n):
 def the_force(q):
     return -1*q
 
-poincare_plot(linear_osc,1,0,0.5,50)
