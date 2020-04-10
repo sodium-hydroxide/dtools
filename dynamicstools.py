@@ -1,3 +1,9 @@
+# IGNORE THIS FILE
+# this was mearly some testing that I did at first before I figured out how to optimize the code.
+
+
+
+
 # Set of functions for dynamical systems written by Noa3h J. Blair
 # Imports packages used
 import numpy as np

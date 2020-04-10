@@ -10,11 +10,19 @@ import dtools as dt
 # Produces poincare section for the duffing equation when the initial conditions are (0.5,0.5)
 # the parameter g gives the strength of the driving force 
 def duffing_run(g):
-    q, p = dt.poincare(dt.duffing,0.5,0.0,g,100)
+    q, p = dt.poincare(dt.duffing,0.1,0.1,g,50)
     return q, p
 
-q, p  = duffing_run(0.0)
+# Gets the values for a given value of g
+q, p  = duffing_run(20.3)
 
-plt.scatter(q,p)
+# generates a plot of the the separatrix for the unforced problem. Points inside the separatrix are negative energy,
+# those outside are positive energy
+Q, P = np.meshgrid(np.arange(-1.5,1.5,0.025),np.arange(-1.5,1.5,0.025))
+H = 0.5*(P**2) - 0.5*(Q**2) + 0.25*(Q**4)
+plt.contour(Q,P,H,0)
 
+# Plots a scatter plot of the points
+plt.scatter(q,p, s = 10)
+# shows the plot
 plt.show()
