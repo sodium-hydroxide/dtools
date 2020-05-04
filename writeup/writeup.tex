@@ -1,4 +1,4 @@
-\documentclass{paper}
+\documentclass{article}
 \usepackage{amsmath,amssymb,calligra,bm,graphicx,hyperref,braket,subfiles}
 \usepackage[toc,page]{appendix}
 \usepackage{changepage}
@@ -96,8 +96,8 @@ where $f(q,p)$ is the time-independent force, and $\gamma$ is a measure of the s
 # Linear oscillator
 def linear_osc(q,p):
     # damping coefficient and natural frequency respectively
-    b = 0.5
-    w = 6.0
+    b = 0.15
+    w = 1.2
     # gives force
     force = -2.0*b*p - (w**2)*q
     return force
@@ -178,8 +178,44 @@ def poincare_plot(time_ind_force,qo,po,g,n):
     plt.scatter(qvals,pvals)
     plt.show()
 \end{lstlisting}
-\section{Damped Driven Pendulum}
-The damped driven pendulum is a classical example of a 
+\section{Linear Oscillator}
+Before we consider a non-linear system, it is useful to analyze a system that has an exactly solvable solution. We will consider a damped-linear oscillator that has a sinusoidal driving force applied to it. For this, we choose a damping coefficient $\beta = 0.15$ and a natural frequency of $\omega_o = 1.2$. These were chosen so that the natural frequency is different from the driving frequency, as well as so that the system is under-damped. This gives the following equations of motion:
+\begin{equation}
+    \ddot{q}+0.30 \dot{q}+1.44 q = \gamma \cos(2\pi t)
+\end{equation}
+Since this can be solved exactly, we are able to write an explicit form for the Poincare map. 
+\begin{equation}
+    \mc{P}(q,p) = 
+    \matx{
+        0.420114 q + 0.671301 p - 0.0206887 \gamma \\
+        -0.966675 q + 0.218724 p - 0.0189672 \gamma
+    }
+\end{equation}
+The code for this map is:
+\begin{lstlisting}
+# Poincare map for linear oscillator with natural frequency
+# w = 1.2 and damping parameter B = 0.15
+    # qo:= the initial position; float
+    # po:= the initial momentum; float
+    # g:= the strength of driving force; float
+    # n:= number of periods to solve for; int
+def lin_osc_poincare(q,p,g):
+    qnew = (0.420114*q) + (0.671301*p) - (0.0206887*g)
+    pnew = (-0.966675*q) + (0.218724*p) - (0.0189672*g)
+    return qnew, pnew
+
+def line_osc_poincare_plot(q,p,g,n):
+    qvals = np.zeros(n)
+    pvals = np.zeros(n)
+    qvals[0] = q
+    pvals[0] = p
+    for i in range(1,n):
+        qnew, pnew = lin_osc_poincare(qvals[i - 1], pvals[i - 1], g)
+        qvals[i] = qnew
+        pvals[i] = pnew
+    plt.scatter(qvals,pvals)
+    plt.show()
+\end{lstlisting}
 \section{Forced Duffing Equation}
 \section{Conclusion}
 \newpage

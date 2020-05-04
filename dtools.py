@@ -77,16 +77,16 @@ def poincare_plot(time_ind_force,qo,po,g,n):
 # Linear oscillator
 def linear_osc(q,p):
     # damping coefficient and natural frequency respectively
-    b = 0.5
-    w = 6.0
+    b = 0.15
+    w = 1.2
     # gives force
     force = -2.0*b*p - (w**2)*q
     return force
 # Damped Driven Pendulum
 def ddpend(q,p):
     # damping coefficient and natural frequency respectively
-    b = 0.5
-    w = 6.0
+    b = 0.125
+    w = 1.0
     # gives force
     force = -2.0*b*p - (w**2)*np.sin(q)
     return force
@@ -95,6 +95,30 @@ def duffing(q,p):
     force = q - (q**3)
     return force
 
+
+
+# Poincare map for linear oscillator with natural frequency
+# w = 1.2 and damping parameter B = 0.15
+    # qo:= the initial position; float
+    # po:= the initial momentum; float
+    # g:= the strength of driving force; float
+    # n:= number of periods to solve for; int
+def lin_osc_poincare(q,p,g):
+    qnew = (0.420114*q) + (0.671301*p) - (0.0206887*g)
+    pnew = (-0.966675*q) + (0.218724*p) - (0.0189672*g)
+    return qnew, pnew
+
+def line_osc_poincare_plot(q,p,g,n):
+    qvals = np.zeros(n)
+    pvals = np.zeros(n)
+    qvals[0] = q
+    pvals[0] = p
+    for i in range(1,n):
+        qnew, pnew = lin_osc_poincare(qvals[i - 1], pvals[i - 1], g)
+        qvals[i] = qnew
+        pvals[i] = pnew
+    plt.scatter(qvals,pvals)
+    plt.show()
 
 ### Set of tools for a periodically impulsed particle
 # solves for the first n values of the recursion relation
@@ -128,3 +152,6 @@ def periodic_impulse_plot(impulse,qo,po,n):
 def the_force(q):
     return -1*q
 
+
+
+poincare_plot(ddpend,1.0,0.0,1.5,1000)
